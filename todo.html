@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo List App</title>
+    <style>
+        /* Global styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            transition: background-color 0.3s, color 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            transition: background-color 0.3s, color 0.3s;
+            border-radius: 12px;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+            letter-spacing: 1px;
+        }
+
+        input, select, button {
+            padding: 0.8rem;
+            margin: 0.5rem 0;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            box-sizing: border-box;
+            font-size: 1rem;
+            width: 100%;
+            transition: 0.3s;
+        }
+
+        input:focus, select:focus, button:focus {
+            outline: none;
+            box-shadow: 0 0 8px rgba(0, 123, 255, 0.6);
+        }
+
+        button {
+            background-color: #5c6bc0;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        button:hover {
+            background-color: #3f51b5;
+            transform: scale(1.05);
+        }
+
+        /* Todo List Styling */
+        #todo_display {
+            margin-top: 1.5rem;
+        }
+
+        .todo-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background-color: #e3f2fd;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+
+        .todo-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .todo-item button {
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .todo-item button:hover {
+            background-color: #0056b3;
+        }
+
+        .completed {
+            text-decoration: line-through;
+            color: #888;
+        }
+
+        /* Dark mode styles */
+        body.dark-mode {
+            background-color: #333;
+            color: white;
+        }
+
+        .container.dark-mode {
+            background-color: #444;
+        }
+
+        .dark-mode .todo-item {
+            background-color: #555;
+            color: white;
+            border: 1px solid #666;
+        }
+
+        .dark-mode .todo-item button {
+            background-color: #555;
+        }
+
+        .dark-mode .todo-item button:hover {
+            background-color: #666;
+        }
+
+        /* Dark mode toggle button */
+        .toggle-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: #fff;
+            border: 2px solid #333;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+            color: #333;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .dark-mode .toggle-btn {
+            background-color: #333;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Todo List</h1>
+        <input type="text" id="todo_input" placeholder="Enter Todo Task">
+        <select id="day_select">
+            <option value="Monday">Monday</option>
+            <option value="Tuesday">Tuesday</option>
+            <option value="Wednesday">Wednesday</option>
+            <option value="Thursday">Thursday</option>
+            <option value="Friday">Friday</option>
+            <option value="Saturday">Saturday</option>
+            <option value="Sunday">Sunday</option>
+        </select>
+        <button onclick="performOperation()">Add Todo</button>
+        <div id="todo_display"></div>
+    </div>
+
+    <!-- Dark Mode Toggle Button -->
+    <button class="toggle-btn" onclick="toggleDarkMode()">
+        🌙
+    </button>
+
+    <script>
+        const todoInput = document.getElementById("todo_input");
+        const daySelect = document.getElementById("day_select");
+        const todoDisplay = document.getElementById("todo_display");
+        const todos = [];
+        let taskCount = 1; // Start task numbering from 1
+
+        // Function to toggle dark mode
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            document.querySelector('.container').classList.toggle('dark-mode');
+        }
+
+        // Function to perform the todo operation
+        function performOperation() {
+            if (!todoInput.value.trim()) return; // Don't add empty tasks
+
+            const newTodo = {
+                id: taskCount++,  // Assign a unique ID starting from 1
+                task: todoInput.value,
+                day: daySelect.value,
+                completion: false,
+            };
+            todos.push(newTodo);
+            updateTodoDisplay();
+            todoInput.value = ""; // Clear the input field after adding
+        }
+
+        // Function to update the todo list display
+        function updateTodoDisplay() {
+            todoDisplay.innerHTML = "";
+            todos.forEach(function (element, index) {
+                const todo = document.createElement("div");
+                todo.className = "todo-item";
+                todo.innerHTML = `
+                    <span class="${element.completion ? 'completed' : ''}">
+                        Task #${element.id}: ${element.task} (${element.day})
+                    </span>
+                    <span>
+                        <button onclick="toggle(${index})">
+                            ${element.completion ? '✔' : '❌'}
+                        </button>
+                        <button onclick="deleteTask(${index})">🗑️</button>
+                    </span>
+                `;
+                todoDisplay.appendChild(todo);
+            });
+        }
+
+        // Function to toggle the completion status of a todo
+        function toggle(index) {
+            todos[index].completion = !todos[index].completion;
+            updateTodoDisplay();
+        }
+
+        // Function to delete a task
+        function deleteTask(index) {
+            todos.splice(index, 1);  // Remove the task from the array
+            updateTodoDisplay();  // Re-render the list
+        }
+    </script>
+</body>
+</html>
