@@ -1,75 +1,100 @@
-//retrieve todo from local storage!
+let addbtn = document.getElementById("addTaskBtn");
+let val = document.getElementById("taskInput");
+let taskplace = document.getElementById("taskList");
+let delbtn = document.getElementById("deleteBtn");
+let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
 
-let todo=JSON.parse(localStorage.getItem("todo")) || [] ;
+document.addEventListener("DOMContentLoaded", function () {
+  addbtn.addEventListener("click", function () {
+    addTask();
+  });
 
-const todoInput = document.getElementById("todoInput");
+  delbtn.addEventListener("click", function () {
+    delalltask();
+  });
 
-const todoList= document.getElementById("todoList");
-
-const todoCount= document.getElementById("todoCount");
-
-const addButton=document.querySelector(".btn");
-
-const deletButton=document.getElementById("deleteButton");
-
-//Start project
-
-document.addEventListener("DOMContentLoaded",function (){
-    addButton.addEventListener("click",addTask);
-    todoInput.addEventListener('keydown',function(event){
-        if (event.key=='Enter'){
-            event.preventDefault();
-            addTask();}
-        });
-    deletButton.addEventListener("click",function deleteAllTask(){todo=[];
-    saveToLocalStorage();
-    displayTask();});
-    displayTask();
+  // Load saved tasks on reload
+  tasks.forEach(task => {
+    createTask(task);
+  });
 });
 
-function addTask(){
-    const newTask=todoInput.value.trim();
-    if (newTask!==""){
-        todo.push({
-            text:newTask,
-            disabled:false,
-        }
-    );
-    saveToLocalStorage();
-    todoInput.value="";
-    displayTask();
-    }
-    else if (newTask===""){
-        alert("space is empty");
+function addTask() {
+  let task = val.value.trim();
+  if (task === "") {
+    alert("add something");
+    return;
+  }
 
-    };
-};
-function displayTask(){
-    todoList.innerHTML="";
-    todo.forEach((item,index) =>{
-        const p=document.createElement("p");
-        p.innerHTML=`
-        <div class="todo-container">
-        <input type="checkbox" class="todo-checkbox" id="input${index}" ${item.disabled ? "checked" : ""}>
-        <p id=todo-${index} class="${item.disabled ? "disabled":""}
-        "onclick="editTask(${index})">
-        ${item.text}
-        </p>
-        </div> 
-        `;
-    p.querySelector(".todo-checkbox").addEventListener("change",() => {toggleTask(index);})
-    todoList.appendChild(p);
-    });
-   todoCount.textContent=todo.length;
-};
+  tasks.push(task);
+  localStorage.setItem("tasks", JSON.stringify(tasks));
 
-function toggleTask(index) {
-    todo[index].disabled=!todo[index].disabled;
-    saveToLocalStorage();
-    displayTask();
+  createTask(task);
+  val.value = "";
 }
 
+function createTask(task) {
+  let li = document.createElement("li");
+  li.style.display = "flex";
+  li.style.alignItems = "center";
+  li.style.justifyContent = "space-between";
+  li.style.gap = "10px";
+  li.style.marginBottom = "10px";
+  li.style.border = "1px solid #ccc";
+  li.style.borderRadius = "8px";
+  li.style.backgroundColor = "#f9f9f901";
+  li.style.padding = "10px";
 
-function saveToLocalStorage(){
-    localStorage.setItem("todo",JSON.stringify(todo));
+  let content = document.createElement("div");
+  content.style.display = "flex";
+  content.style.alignItems = "center";
+  content.style.gap = "10px";
+
+  let input = document.createElement("input");
+  input.type = "checkbox";
+  input.style.height = "20px";
+  input.style.width = "20px";
+  input.style.cursor = "pointer";
+
+  let p = document.createElement("p");
+  p.textContent = task;
+  p.style.margin = "0";
+  p.style.fontSize = "16px";
+
+  input.addEventListener("change", function () {
+    if (input.checked) {
+      p.style.textDecoration = "line-through";
+      p.style.opacity = "1";
+    } else {
+      p.style.textDecoration = "none";
+      p.style.opacity = "1";
+    }
+  });
+
+  content.appendChild(input);
+  content.appendChild(p);
+
+  let del = document.createElement("button");
+  del.textContent = "❌";
+  del.style.background = "transparent";
+  del.style.border = "none";
+  del.style.cursor = "pointer";
+  del.style.color = "red";
+  del.style.fontSize = "18px";
+
+  del.addEventListener("click",function(){
+    taskplace.removeChild(li);
+    tasks=tasks.filter(t=>t!==task)
+    localStorage.setItem("tasks",JSON.stringify(tasks))
+  })
+  
+  li.appendChild(content);
+  li.appendChild(del);
+  taskplace.appendChild(li);
+}
+
+function delalltask() {
+  taskplace.innerHTML = "";
+  localStorage.removeItem("tasks");
+  tasks=[];
 }
